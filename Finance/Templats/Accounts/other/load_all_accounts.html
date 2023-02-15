@@ -1,0 +1,5 @@
+<datalist id="browsers">
+    {% for i in select_accounts %}
+    <option value="{{i.Account_No}}">{{i.Account_Description}}</option>
+    {% endfor %}
+</datalist>

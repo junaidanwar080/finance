@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Transection Details</title>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div id="msg"></div>
+    <div style="margin-top: 20px; margin-left: 1000px;"><a href="{% url 'all_journal_vouchers' %}" class="btn btn-primary">View J.V Details</a></div>
+    <!-- Ledger Equity Insert Modal Start -->
+    <div>
+        <div class="">
+            <div class="modal-dialog">
+                <div class="modal-content" style="width: 1100px; margin-left: -300px;">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Voucher Details</h4>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <form>
+                            <div style="margin-left: 15px; margin-bottom: 30px;">
+                                <br>
+                                <table>
+                                    <tr>
+                                        <td><label><b>Voucher no<span style="color:red; font-weight:bold">*</span></b></label></td><td><input autocomplete="off" type="text" name="" list="bills" id="voucher_id" placeholder="Voucher no#" class="form-control"></td>
+                                    </tr>
+                                    <tr hidden="">
+                                        <td><label><b>Computer Number</b></label></td><td><input type="text" name="" id="computer_no" placeholder="Company Number" class="form-control"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label><b> Select Date</b></label></td><td><input type="date" name="" id="transection_date" value="{{date}}" class="form-control"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label><b> Voucher Type<span style="color:red; font-weight:bold">*</span></b></label></td>
+                                        <td>
+                                            <select  name="" id="voucher_type" class="form-control">
+                                                {% for i in all_voucher_types %}
+                                                <option value="{{i.Voucher_Type_Code}}">{{i.Description}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <input type="text" name="" id="row_counter" value="1">
+                            <div class="form-group">
+                                <table class="table" id="table_id">
+                                    <thead>
+                                        <tr>
+                                            <th>Account code<span style="color:red; font-weight:bold">*</span></th>
+                                            <th hidden="">Account Name</th>
+                                            <th> Description</th>
+                                            <th>Debit<span style="color:red; font-weight:bold">*</span></th>
+                                            <th>Credit<span style="color:red; font-weight:bold">*</span></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table_body">
+                                        <tr>
+                                            <td>
+                                                <input autocomplete="off" list="browsers" onchange="get_name('browser_0' , 'account_name_0')" name="account_code[]" id="browser_0" class="form-control account_code" placeholder="Enter Account Name">
+                                            </td>
+                                            <td hidden="">
+                                                <input name="account[]" id="account_name_0"  placeholder="Account Name" class="form-control account">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="description[]" placeholder="Description" class="form-control description" >
+                                            </td>
+                                            <td><div class="form-group">
+                                                <input type="text" name="debit_account[]" onchange="get_debit_val('transection_debit_0' , 'transection_credit_0')" id="transection_debit_0" placeholder="Debit Amount"  class="form-control debit_account">
+                                            </div></td>
+                                            <td><div class="form-group">
+                                                <input type="text" name="credit_account[]" onchange="get_credit_val('transection_debit_0' , 'transection_credit_0')" id="transection_credit_0" placeholder="Credit Amount"  class="form-control credit_account">
+                                            </div></td>
+                                            <td>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <a class="btn btn-primary add_row" id="add_new_row" >Add New Row</a>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success btn_save" id="insert_transection" >Save Transection Details</button>
+                        <!-- <a href="journal_voucher_detail.php" class="btn btn-primary">View Voucher Detail</a> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Ledger Equity Insert Modal End -->
+
+    <!--Start Display Insert message -->
+    <div class="modal fade" id="insert_reply">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Allert...!!!</h4>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body" id="insert-msg"></div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Ok</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--Start Display Insert message -->
+    <script type="text/javascript">
+        $(document).on("click" , "#add_new_row" , function(){
+            var last_counter = $("#row_counter").val();
+            var account_code_id = "'browser_"+last_counter+"'";
+            var account_name_id = "'account_name_"+last_counter+"'";
+            var debit_val = "'transection_debit_"+last_counter+"'";
+            var credit_val = "'transection_credit_"+last_counter+"'";
+            $("#table_id tbody").append('<tr><td><div class="form-comtrol"><input autocomplete="off" list="browsers" onchange="get_name('+account_code_id+' , '+account_name_id+')" name="account_code[]" id="browser_'+last_counter+'" placeholder="Enter Account Name"class="form-control account_code"></div></td><td hidden=""><input name="account[]" id="account_name_'+last_counter+'"  placeholder="Account Name" class="form-control account"></td><td><input type="text" name="description[]" placeholder="Description" class="form-control description"></td> <td><divclass="form-group"><input type="text" name="debit_account[]" onchange="get_debit_val('+debit_val+' , '+credit_val+')" id="transection_debit_'+last_counter+'" placeholder="Debit Amount"  class="form-control debit_account"></div></td><td><div class="form-group"><input type="text" name="credit_account[]" onchange="get_credit_val('+debit_val+' , '+credit_val+')" id="transection_credit_'+last_counter+'" placeholder="Credit Amount"  class="form-control credit_account"></div></td><td><a href="javascript:void(0)" class="remove_row"><strong> Delete </strong></a></td></tr>');
+            last_counter++;
+            $("#row_counter").val(last_counter);
+        });
+        $(document).on('click','.remove_row',function() {
+            $(this).parents('tr').remove();
+        });
+
+        $(document).ready(function(){
+            $("#insert_transection").on("click",function(){
+                var voucher_id = $("#voucher_id").val();
+                var computer_no = $("#computer_no").val();
+                var transection_date = $("#transection_date").val();
+                var voucher_type = $("#voucher_type").val();
+                var account_code = document.getElementsByClassName( 'account_code' ),
+                all_account_codes  = [].map.call(account_code, function( input ) {
+                    return input.value;
+                }).join( ',' );
+            //
+            var description = document.getElementsByClassName( 'description' ),
+            all_descriptions  = [].map.call(description, function( input ) {
+                return input.value;
+            }).join( ',' );
+            //
+            var debit_account = document.getElementsByClassName( 'debit_account' ),
+            all_debit_accounts  = [].map.call(debit_account, function( input ) {
+                return input.value;
+            }).join( ',' );
+            //
+            var credit_account = document.getElementsByClassName( 'credit_account' ),
+            all_credit_accounts  = [].map.call(credit_account, function( input ) {
+                return input.value;
+            }).join( ',' );
+            // alert(computer_no)
+            $.ajax({
+                url:"voucher_insert",
+                type:"POST",
+                data:{all_account_codes:all_account_codes , all_debit_accounts:all_debit_accounts , all_credit_accounts:all_credit_accounts , voucher_type:voucher_type , voucher_id:voucher_id , transection_date:transection_date , computer_no:computer_no , all_descriptions:all_descriptions},
+                success:function(data){
+                    if (data == "data inserted successfully") {
+                        window.location.href = "{% url 'all_journal_vouchers' %}";
+                    } else if (data == "Please fill Required fields") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    } else if (data == "please type Voucher Number") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    } else if (data == "Please fill Atleast one amount") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    } else if (data == "Please fill one amount") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    } else if (data == "Please Select Account") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    }else if (data == "This voucher Number already exist") {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');	
+                    }else {
+                        $('#insert_reply').modal('show');
+                        $("#insert-msg").empty();
+                        $("#insert-msg").append('<div class="alert alert-danger text-center" role="alert">'+data+'</div>');
+                    }
+                }
+            });
+        });
+            account_names('browser_0');
+        });
+        function get_name(account_code_id ,account_name_id ) {
+            var item_id = $('#'+account_code_id).val();
+            $.ajax({    
+                url:"sell_item_load.php",
+                type:"POST",
+                dataType:"JSON",
+                data:{item_id:item_id},
+                success:function(item_data){
+                    console.log(item_data);
+                    $("#"+account_name_id).val(item_data.name);
+                }
+            });
+        }
+// Onchange debit , credit wil be 0.00
+function get_debit_val(debit_val ,credit_val ) {
+    var debit = $('#'+debit_val).val();
+    var credit = $('#'+credit_val).val();
+    credit=0.00;
+    $("#"+credit_val).val(credit.toFixed(2));
+}
+// Onchange credit , debit wil be 0.00
+function get_credit_val(debit_val ,credit_val ) {
+    var debit = $('#'+debit_val).val();
+    var credit = $('#'+credit_val).val();
+    debit=0.00;
+    $("#"+debit_val).val(debit.toFixed(2));
+}
+
+function account_names(account_code_id){
+    $.ajax({
+        url:'load_all_accounts',
+        type:'POST',
+        success:function(load){
+            console.log(load);
+            $("#"+account_code_id).html(load);
+        }
+    });
+}
+</script>
+</body> 
+</html>

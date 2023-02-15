@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chart Of Accounts</title>
+</head>
+
+<body>
+    {% include 'header.html' %}
+    <div style="margin-left: 100px; margin-top: 10px;">
+        <!-- Add voucher type Button -->
+        <button style="margin-left: 700px;" class="btn btn-sm btn-primary" id="btn_save" data-toggle="modal"
+            data-target="#add_voucher_type_model">New Type</button>
+    </div>
+    <div id="all_vouvher_types" style="margin-left: 100px; margin-right: 100px; margin-top: 20px;">
+       
+    </div>
+    <!-- Add voucher Type Modal -->
+    <div class="modal fade" id="add_voucher_type_model" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Voucher Type</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="all-reply"></div>
+                    <form id="insert_voucher_type">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="">Description<span style="color:red; font-weight:bold">*</span></label>
+                            <input type="text" class="form-control" id="voucher_type_name" name="voucher_type_name">
+                        </div>
+                        
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="just_insert_voucher_type">Save & New</button>
+                    <button type="button" class="btn btn-primary" id="insert_and_close">Save & Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Account Modal -->
+    <div class="modal fade" id="update_voucher_type_model" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="edit_reply"></div>
+                    <div>
+                        <form id="edit_voucher_type_data">
+                            {% csrf_token %}
+                            <div class="form-group" >
+                                <label for="">Id</label>
+                                <input type="text" class="form-control" name="update_voucher_type_id" id="update_voucher_type_id">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="">Description<span style="color:red; font-weight:bold">*</span></label>
+                                <input type="text" class="form-control" id="update_voucher_type_name" name="update_voucher_type_name">
+                            </div>
+                            
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="just_update_voucher_type">Update</button>
+                    <button type="button" class="btn btn-primary" id="update_and_close">Edit & Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            // update load button
+            $(document).on("click", ".update_voucher_type_data", function () {
+                var code = $(this).attr('id');
+                
+                $.ajax({
+                    url: 'voucher_type_load_for_update/' + code,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    success: function (data) {
+                        console.log(data)
+                        $('#update_voucher_type_name').val(data.Description)
+                        $('#update_voucher_type_id').val(data.Voucher_Type_Code)
+                    }
+                });
+            });
+       
+            // insert message id become empty
+            $(document).on("click", "#btn_save", function () {
+                $("#all-reply").empty();
+            });
+            // update message id become empty
+            $(document).on("click", ".update_btn", function () {
+                $("#edit_reply").empty();
+            });
+            // just insert Account data
+            $("#just_insert_voucher_type").on("click", function () {
+                // alert("came here");
+                var account_form = $("#insert_voucher_type").serialize();
+                $.ajax({
+                    url: "voucher_type_insert",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Voucher Type Created") {
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                            $("#accounts_data")[0].reset();
+                        } else {
+
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+            // insert and close Account data
+            $("#insert_and_close").on("click", function () {
+                var account_form = $("#insert_voucher_type").serialize();
+                $.ajax({
+                    url: "voucher_type_insert",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Voucher Type Created") {
+                            $('#add_voucher_type_model').modal('hide');
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                            $("#accounts_data")[0].reset();
+                        } else {
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+
+            // just Update Account data
+            $("#just_update_voucher_type").on("click", function () {
+                var account_form = $("#edit_voucher_type_data").serialize();
+                $.ajax({
+                    url: "voucher_type_update",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Voucher Type Updated") {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_reply").fadeIn();
+                            $("#edit_reply").fadeOut(3000).delay(1000).hide(100);
+                            all_voucher_types();
+                            $("#edit_accounts_data")[0].reset();
+                        } else {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+            // Update and close Account Modal
+            $("#update_and_close").on("click", function () {
+                var account_form = $("#edit_voucher_type_data").serialize();
+                $.ajax({
+                    url: "voucher_type_update",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Voucher Type Updated") {
+                            $('#update_voucher_type_model').modal('hide');
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_reply").fadeIn();
+                            $("#edit_reply").fadeOut(3000).delay(1000).hide(100);
+                            all_voucher_types();
+                        } else {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+           
+            all_voucher_types();
+           
+            
+        });
+
+        
+
+        // Chart of accounts call
+        const all_voucher_types = () => {
+            $.ajax({
+                url: "select_all_voucher_types",
+                type: 'POST',
+                success: function (all_accounts) {
+                    $("#all_vouvher_types").html(all_accounts);
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>

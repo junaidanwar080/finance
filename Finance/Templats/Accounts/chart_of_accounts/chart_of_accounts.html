@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chart Of Accounts</title>
+</head>
+
+<body>
+    {% include 'header.html' %}
+    <div style="margin-left: 100px; margin-top: 10px;">
+       <b>Search by Account No</b>
+        <input type="text" name="search_account" id="search_account" placeholder="Search Acount here">
+        <!-- Add New Account Button -->
+        <button style="margin-left: 700px;" class="btn btn-sm btn-primary" id="btn_save" data-toggle="modal"
+            data-target="#add_account_model">New Account</button>
+    </div>
+    <div id="all_accounts" style="margin-left: 100px; margin-right: 100px; margin-top: 20px;">
+       
+    </div>
+    <!-- Add New Account Modal -->
+    <div class="modal fade" id="add_account_model" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Account Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="all-reply"></div>
+                    <form id="accounts_data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="">Account No#<span style="color:red; font-weight:bold">*</span></label>
+                            <input type="text" class="form-control" name="ac_no" id="ac_no">
+                        </div>
+                        <div class="form-group">
+                            <label for="">Account Name<span style="color:red; font-weight:bold">*</span></label>
+                            <input type="text" class="form-control" id="ac_name" name="ac_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="">Account Type<span style="color:red; font-weight:bold">*</span></label>
+                            <select class="form-control" id="main_code" name="main_code">
+                                <option> Assats</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="">Opening Balance (PKR)</label>
+                            <input type="text" class="form-control" id="ac_opening_balance" name="ac_opening_balance">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="just_insert_account">Save & New</button>
+                    <button type="button" class="btn btn-primary" id="insert_and_close">Save & Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Account Modal -->
+    <div class="modal fade" id="update_account_model" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="edit_reply"></div>
+                    <div>
+                        <form id="edit_accounts_data">
+                            {% csrf_token %}
+                            <div class="form-group" hidden>
+                                <label for="">Account Id</label>
+                                <input type="text" class="form-control" name="update_ac_id" id="update_ac_id">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Account No#<span style="color:red; font-weight:bold">*</span></label>
+                                <input type="text" class="form-control" name="update_ac_no" id="update_ac_no">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Account Name<span style="color:red; font-weight:bold">*</span></label>
+                                <input type="text" class="form-control" id="update_ac_name" name="update_ac_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Account Type<span style="color:red; font-weight:bold">*</span></label>
+                                <select class="form-control" id="update_account_id" name="update_account_id">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="">Opening Balance (PKR)</label>
+                                <input type="text" class="form-control" id="update_ac_opening_balance"
+                                    name="update_ac_opening_balance">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="just_update_account">Update</button>
+                    <button type="button" class="btn btn-primary" id="update_and_close">Edit & Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            // update load button
+            $(document).on("click", ".update_account_data", function () {
+                var account_code = $(this).attr('id');
+                // alert(account_code);
+                $.ajax({
+                    url: 'account_load_for_update/' + account_code,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    success: function (data) {
+                        console.log(data)
+                        //$('#update_ac_id').val(data.Account_No)
+                        $('#update_ac_name').val(data.Account_Description)
+                        $('#update_ac_no').val(data.Account_No)
+                        //$('#update_ac_opening_balance').val(data.opening_balance)
+                    }
+                });
+            });
+            // Search Account Id
+            $(document).on('keyup', function () {
+                var search_id = $("#search_account").val();
+                $.ajax({
+                    url: 'chart_of_accounts1.php',
+                    type: 'POST',
+                    data: { search_id: search_id },
+                    success: function (search_data) {
+                        $("#all_accounts").html(search_data);
+                    }
+                });
+            });
+            // insert message id become empty
+            $(document).on("click", "#btn_save", function () {
+                $("#all-reply").empty();
+            });
+            // update message id become empty
+            $(document).on("click", ".update_btn", function () {
+                $("#edit_reply").empty();
+            });
+            // just insert Account data
+            $("#just_insert_account").on("click", function () {
+                // alert("came here");
+                var account_form = $("#accounts_data").serialize();
+                $.ajax({
+                    url: "chart_of_account_insert",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Account Created") {
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                            $("#accounts_data")[0].reset();
+                        } else {
+
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+            // insert and close Account data
+            $("#insert_and_close").on("click", function () {
+                var account_form = $("#accounts_data").serialize();
+                $.ajax({
+                    url: "chart_of_account_insert",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Account Created") {
+                            $('#add_account_model').modal('hide');
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                            $("#accounts_data")[0].reset();
+                        } else {
+                            $("#all-reply").empty();
+                            $("#all-reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+            // just Update Account data
+            $("#just_update_account").on("click", function () {
+                var account_form = $("#edit_accounts_data").serialize();
+                $.ajax({
+                    url: "chart_of_account_update",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Account Updated") {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_reply").fadeIn();
+                            $("#edit_reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                            $("#edit_accounts_data")[0].reset();
+                        } else if (data == "plese fill all required fields") {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#edit_reply").fadeIn();
+                            $("#edit_reply").fadeOut(3000).delay(1000).hide(100);
+                        } else {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+            // Update and close Account Modal
+            $("#update_and_close").on("click", function () {
+                var account_form = $("#edit_accounts_data").serialize();
+                $.ajax({
+                    url: "chart_of_account_update",
+                    type: "POST",
+                    data: account_form,
+                    success: function (data) {
+                        if (data == "Account Updated") {
+                            $('#update_account_model').modal('hide');
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_reply").fadeIn();
+                            $("#edit_reply").fadeOut(3000).delay(1000).hide(100);
+                            chart_of_accounts();
+                        } else {
+                            $("#edit_reply").empty();
+                            $("#edit_reply").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            $("#all-reply").fadeIn();
+                            $("#all-reply").fadeOut(3000).delay(1000).hide(100);
+                        }
+                    }
+                });
+            });
+           
+            chart_of_accounts();
+            load_accounts();
+            
+        });
+
+        //accounts laad for input account data form
+        function load_accounts() {
+            $.ajax({
+                url: 'head_load',
+                type: 'POST',
+                success: function (sub_name) {
+                    $("#account_id").html(sub_name);
+                    $("#update_account_id").html(sub_name);
+
+                }
+            });
+        }
+
+        // Chart of accounts call
+        function chart_of_accounts() {
+            $.ajax({
+                url: "select_chart_of_account",
+                type: 'POST',
+                success: function (all_accounts) {
+                    $("#all_accounts").html(all_accounts);
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>

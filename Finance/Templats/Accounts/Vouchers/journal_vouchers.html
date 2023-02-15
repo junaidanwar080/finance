@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transections</title>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="text-center" style="margin-top: 10px;">
+        <h2>J.V Details</h2>
+    </div>
+    <hr>
+    <div style="margin-left:10px; border-radius: 10px; margin-top: 10px;">
+        <span style="margin-left:50px;"><b>Computer No</b></span>
+        <input type="text" name="" style="height: 35px; border-radius: 5px; " placeholder="Search Computer no#" value="JV-" id="voucher_id">
+        <a class="btn btn-primary" style="margin-left: 750px;" href="{% url 'journal_voucher' %}">Add Journal Voucher</a>
+    </div>
+    <div style="margin-left: 50px; margin-right: 50px; margin-top: 10px;">
+        <table class="table">
+            <thead>
+                <tr style="background: #A9A9A9">
+
+                    <th scope="col" >Sr.</th>
+                    <th scope="col" >Date</th>
+                    <th scope="col" >Voucher Number</th>
+                    <th scope="col">Voucher Type</th>
+                    <th scope="col" >Details</th>
+                </tr>		
+            </thead>
+            <tbody>
+        
+                {% for i in select_all %}
+        
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{i.Created_on|date:'d-m-Y'}}</td>
+                <td>{{i.Voucher_No}}</td>
+                <td>{{i.Voucher_Type_Code}}</td>
+                
+                 <td><!--<button  id="{{ i.Account_No }}" class="btn btn-danger btn-sm party_delete">Delete</button> -->
+                    <a href="voucher_detail/{{i.Trans_id}}" class="btn btn-primary btn-sm" >View</a></td>
+            </tr>
+            
+            {% endfor %}
+            
+            
+        
+            </tbody>
+        </table>
+    </div>
+
+    <script type="text/javascript">
+        
+        $(document).ready(function(){
+            LoadVouchers();
+            
+            $("#voucher_id").on("keyup" , function(){
+                var voucher_id = $("#voucher_id").val();
+                $.ajax({
+                    url:"transection_select.php",
+                    type:"POST",
+                    data:{bill_no:voucher_id},
+                    success:function(data) {
+                        $("#load-transections").html(data);
+                    }
+                });
+            });        
+    });
+</script>
+</body>
+</html>

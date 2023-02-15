@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Parties</title>
+</head>
+
+<body>
+    {% include 'Admin_Navbar.html' %}
+    <!-- {% include 'Accounts\Party_Profile\PartyProfileModals.html' %} -->
+    <div class="container">
+        <div style="margin-left: 900px; margin-top: 15px;"><a data-toggle="modal" data-target="#User_Role_profile"
+                class="btn btn-sm btn-primary">Users</a></div>
+        <div id="msg" class="text-center" style="border-radius: 5px; "></div>
+        <!-- table start -->
+        <div class="card mt-4">
+            <div class="card-header text-center">All Parties</div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Sr</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone No </th>
+                            <th scope="col">Description </th>
+                            <th scope="col">Created On</th>
+                            <th scope="col">Actions</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="all_profiles">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- table end  -->
+    </div>
+
+    <!-- Party Profile Insert Modal Start -->
+    <div class="modal fade" id="User_Role_profile">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Party</h4>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form id="user_role_form">
+                        <div class="from-group">
+                            <label for="User_id_id">User_id</label>
+                            <input type="text" class="form-control" id="User_id_id" name="User_id_id">
+                        </div>
+                        <div class="from-group">
+                            <label for="Role_Id" class="form-label">Role_Id</label>
+                            <input type="text" class="form-control" name="Role_Id" id="Role_Id">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary my-3">Submit</button>
+
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn_save_user_profile">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Party Profile Insert Modal End -->
+
+
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // Party Profile data load in the form
+            //---------------------------------------------
+            $(document).on("click", ".update_profile", function () {
+                let party_id = $(this).attr("id");
+                $.ajax({
+                    url: "party_profile_load_for_update/" + party_id,
+                    type: "POST",
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#update_party_code").val(data.Party_Code);
+                        $("#update_party_name").val(data.Name);
+                        $("#update_account").val(data.Account_No);
+                        $("#update_ntn_number").val(data.NTN_No);
+                        $("#update_address").val(data.Address);
+                        $("#update_phone_no").val(data.Phone_No);
+                        $("#update_description").val(data.Description);
+                    }
+                });
+            });
+            // update Party Profile form
+            //-------------------------------------------
+            $("#btn_party_update").on("click", function () {
+                let update_party_profile_form = $('#update_party_profile_form').serialize();
+
+                $.ajax({
+                    url: "update_party_profile",
+                    type: "POST",
+                    data: update_party_profile_form,
+                    success: function (data) {
+                        if (data == "Party Record Updated") {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_msg").fadeIn();
+                            $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_profiles();
+                        } else {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            select_party_profiles();
+                        }
+                    }
+                });
+            });
+            // update and close Party Profile form
+            //----------------------------------------------------
+            $("#btn_party_update_close").on("click", function () {
+                let update_party_profile_form = $('#update_party_profile_form').serialize();
+                $.ajax({
+                    url: "update_party_profile",
+                    type: "POST",
+                    data: update_party_profile_form,
+                    success: function (data) {
+                        if (data == "Party Record Updated") {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_msg").fadeIn();
+                            $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_profiles();
+                            $('#update_party_profile_model').modal('hide');
+                        } else {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            // $("#edit_msg").fadeIn();
+                            // $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_profiles();
+                            // $("#insert_vendor")[0].reset();
+                        }
+                    }
+                });
+            });
+            // insert vendors
+            //-------------------------------------------------------
+            $("#btn_save_user_profile").on("click", function () {
+                let user_form = $("#user_role_form").serialize();
+                $.ajax({
+                    url: 'insert_user_role',
+                    type: 'post',
+                    data: user_form,
+                    success: function (message) {
+                        if (message == 'User Created') {
+                            $("#msg").html(message);
+                            $("#msg").css('background-color', '#b5e7a0');
+                            $('#User_Role_profile').modal('hide');
+                            select_party_profiles();
+                        } else {
+                            $("#insert-reply").html(message);
+                            $("#insert-reply").css('background-color', '#eca1a6');
+                        }
+                    }
+                });
+            });
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            load_all_accounts();
+            load_all_paty_types();
+            select_all_users();
+        });
+
+        // All Acocunts 
+        const load_all_accounts = () => {
+            $.ajax({
+                url: 'load_all_accounts',
+                type: 'post',
+                success: function (data) {
+                    $("#account").html(data);
+                }
+            });
+        }
+
+        const load_all_paty_types = () => {
+            $.ajax({
+                url: 'load_all_party_types',
+                success: function (type) {
+                    $('#all_types').html(type)
+                }
+            });
+        }
+
+        // select customers 
+        const select_all_users = () => {
+            $.ajax({
+                url: 'select_all_users',
+                type: 'post',
+                success: function (data) {
+                    $("#all_profiles").html(data);
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Parties</title>
+</head>
+
+<body>
+	{% include 'Admin_Navbar.html' %}
+	{% include './user_modals.html' %}
+	<div class="container">
+		<div style="margin-left: 900px; margin-top: 15px;"><a data-toggle="modal" data-target="#user_profile"
+				class="btn btn-sm btn-primary">Users</a></div>
+		<div id="msg" class="text-center" style="border-radius: 5px; "></div>
+		<!-- table start -->
+		<div class="card mt-4">
+			<div class="card-header text-center">All Users</div>
+			<div class="card-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Sr</th>
+							<th scope="col">First Name</th>
+							<th scope="col">Last Name</th>
+							<th scope="col">User Name</th>
+							<th scope="col">Email</th>
+							
+							<th scope="col">Type</th>
+							<th scope="col">Created On</th>
+							<th scope="col">Actions</th>
+
+						</tr>
+					</thead>
+					<tbody id="all_profiles">
+
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- table end  -->
+	</div>
+
+	<!-- User Profile Insert Modal Start -->
+	<div class="modal fade" id="user_profile">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<h4 class="modal-title">Add User</h4>
+				</div>
+				<!-- Modal body -->
+				<div class="modal-body">
+					<form id = "user_form">
+						
+						<div class="from-group">
+							<label for="Name" class="form-label">Name</label>
+							<input type="text" class="form-control" name="Name" id="Name">
+						</div>
+						<div class="from-group">
+							<label for="Email">Email</label>
+							<input type="text" class="form-control" id="Email" name="Email">
+						</div>
+						<div class="from-group">
+							<label for="Phone">Phone</label>
+							<input type="number" class="form-control" id="Phone" name="Phone">
+						</div>
+						<div class="from-group">
+							<label for="Gender">Gender</label>
+							<input type="text" class="form-control" id="Gender" name="Gender">
+						</div>
+						<div class="from-group">
+							<label for="Login_Name" class="form-label">User Name</label>
+							<input type="text" class="form-control" name="Login_Name" id="Login_Name">
+						</div>
+						<div class="from-group">
+							<label for="Password" class="form-label">Password</label>
+							<input type="text" class="form-control" name="Password" id="Password">
+						</div>
+						<div class="from-group">
+							<label for="Company_Cde_id" class="form-label">Company_Cde</label>
+							<input type="text" class="form-control" name="Company_Cde_id" id="Company_Cde_id">
+						</div>
+					</form>
+				</div>
+
+				<!-- Modal footer -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" id="btn_save_user_profile">Save</button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- Party Profile Insert Modal End -->
+
+
+
+
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			// Delete user
+			$(document).on("click",".user_delete",function(){
+				let id = $(this).attr("id");
+				alert(id);
+				$.ajax({
+					url:"delete_user/"+id,
+					type:"POST",
+					success:function(){
+						alert("datadeleted");
+					}
+
+
+				});
+			});
+
+			// Party Profile data load in the form
+			//---------------------------------------------
+			$(document).on("click", ".update_user_profile", function () {
+				let user_id = $(this).attr("id");
+				$.ajax({
+					url: "user_profile_load_for_update/" + user_id,
+					type: "POST",
+					dataType: 'json',
+					success: function (data) {
+						console.log(data)
+						$("#edit_user_id").val(data.id);
+						$("#edit_first_name").val(data.first_name);
+						$("#edit_last_name").val(data.last_name);
+						$("#edit_username").val(data.username);
+						$("#edit_Email").val(data.email);
+						//$("#edit_Phone").val(data.NTN_No);
+						//$("#edit_Gender").val(data.Address);
+						//$("#edit_Login_Name").val(data.Phone_No);
+						
+					}
+				});
+			});
+			// update User Profile form
+			//-------------------------------------------
+			$("#btn_user_update").on("click", function () {
+				let update_user_profile_form = $('#edit_user_form').serialize();
+
+				$.ajax({
+					url: "update_user_profile",
+					type: "POST",
+					data: update_user_profile_form,
+					success: function (data) {
+						if (data == "User Data Updated") {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+							$("#edit_msg").fadeIn();
+							$("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_all_users();
+						} else {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+							select_all_users();
+						}
+					}
+				});
+			});
+			// update and close Party Profile form
+			//----------------------------------------------------
+			$("#btn_party_update_close").on("click", function () {
+				let update_party_profile_form = $('#update_party_profile_form').serialize();
+				$.ajax({
+					url: "update_party_profile",
+					type: "POST",
+					data: update_party_profile_form,
+					success: function (data) {
+						if (data == "Party Record Updated") {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+							$("#edit_msg").fadeIn();
+							$("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_all_users();
+							$('#update_user_profile_model').modal('hide');
+						} else {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+							// $("#edit_msg").fadeIn();
+							// $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_all_users();
+							// $("#insert_vendor")[0].reset();
+						}
+					}
+				});
+			});
+			// insert vendors
+			//-------------------------------------------------------
+			$("#btn_save_user_profile").on("click", function () {
+				let user_form = $("#user_form").serialize();
+				$.ajax({
+					url: 'insert_user',
+					type: 'post',
+					data: user_form,
+					success: function (message) {
+						if (message == 'User Created') {
+							$("#msg").html(message);
+							$("#msg").css('background-color', '#b5e7a0');
+							$('#party_profile_form').modal('hide');
+							select_party_profiles();
+						} else {
+							$("#insert-reply").html(message);
+							$("#insert-reply").css('background-color', '#eca1a6');
+						}
+					}
+				});
+			});
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				}
+			});
+
+			load_all_paty_types();
+			select_all_users();
+		});
+
+		// All Acocunts 
+		
+
+		const load_all_paty_types = () => {
+			$.ajax({
+				url: 'load_all_party_types',
+				success: function (type) {
+					$('#all_types').html(type)
+				}
+			});
+		}
+
+		// select customers 
+		const select_all_users = () => {
+			$.ajax({
+				url: 'select_all_users',
+				type: 'post',
+				success: function (data) {
+					$("#all_profiles").html(data);
+				}
+			});
+		}
+	</script>
+
+</body>
+
+</html>

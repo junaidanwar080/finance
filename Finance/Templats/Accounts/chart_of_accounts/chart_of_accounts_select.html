@@ -1,0 +1,31 @@
+<table class="table table-hover" >
+    <thead>
+        <tr>
+            <th>Sr</th>
+            <th>Accounts Code</th>
+            <th>Description</th>
+            <th>Created On</th>
+            <th>Updated On</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        {% for i in accounts_select %}
+
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{i.Account_No}}</td>
+        <td>{{i.Account_Description|capfirst}}</td>
+        <td>{{i.Created_on|date:'d-m-Y'}}</td>
+        <td>{{i.Updated_on|date:'d-m-Y'}}</td>
+         <td><!--<button  id="{{ i.Account_No }}" class="btn btn-danger btn-sm party_delete">Delete</button> -->
+            <button id="{{ i.Account_No }}" class="btn btn-primary btn-sm update_account_data" data-toggle="modal" data-target="#update_account_model">Edit</button></td>
+    </tr>
+    
+    {% endfor %}
+    
+    
+
+    </tbody>
+</table>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Party Type</title>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+        <div style="margin-left: 900px; margin-top: 15px;"><a data-toggle="modal" data-target="#party_type_insert"
+                class="btn btn-sm btn-primary">Add Party Type</a></div>
+        <div id="msg" class="text-center" style="border-radius: 5px; "></div>
+        <!-- table start -->
+        <div class="card mt-4">
+            <div class="card-header text-center"><b>Party Types</b></div>
+            <div class="card-body" id="all_party_types">
+               
+            </div>
+        </div>
+        <!-- table end  -->
+    </div>
+
+    <!-- Party Type Insert Modal Start -->
+    <div class="modal fade" id="party_type_insert">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Party Type</h4>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form id="party_type_form" method="POST" action="insert_party_type">
+                        {% csrf_token %}
+                        <div id="insert-reply" class="text-center" style="border-radius: 5px;"></div>
+                        <div class="form-group">
+                            <label>Party Type Code<span style="color:red; font-weight:bold;">*</span></label>
+                            <input type="text" name="party_type_code" id="party_type_code" placeholder="" required=""
+                                class="form-control">
+                            <span class="text-danger error-text "></span>
+                        </div>
+                        <div class="form-group">
+                            <label>description<span style="color:red; font-weight:bold;">*</span></label>
+                            <input type="text" name="description" id="description" placeholder="" class="form-control">
+                            <span class="text-danger error-text "></span>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn_save_party_type">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Customer Insert Modal End -->
+
+
+
+
+    <!-- Customer Update Modal Start -->
+    <div class="modal fade" id="type_update_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Customer</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div id="edit_msg"></div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form id="update_type">
+                        <div class="form-group">
+                            <label> Party Type Code<span style="color:red; font-weight:bold">*</span></label>
+                            <input type="text" name="update_party_type_code" id="update_party_type_code"
+                                placeholder="Customer Name" required="" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>description</label>
+                            <textarea name="update_description" rows="2" id="update_description" class="form-control"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn_type_update">Update</button>
+                    <button type="button" class="btn btn-success" id="btn_type_update_close">Update and
+                        close</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Vendor Update Modal END -->
+
+
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+           
+                $(document).on('click','.party_delete',function(){
+                    var party_type_id = $(this).attr('id');
+                    //alert(party_type_id);
+                    $.ajax({
+                        url:"delete_party_type/"+party_type_id,
+                        success:function(msg){
+                            //alert(msg);
+                            select_party_type();
+                        }
+                    });
+                });
+            
+            // customer data load in the form
+            //---------------------------------------------
+            $(document).on("click", ".update_paty_type", function () {
+                let party_type_code = $(this).attr("id");
+                $.ajax({
+                    url: "type_load_for_update/" + party_type_code,
+                    type: "POST",
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#update_party_type_code").val(data.Party_Type_Code);
+                        $("#update_description").val(data.Description);
+                    }
+                });
+            });
+            // update customer form
+            //-------------------------------------------
+            $("#btn_type_update").on("click", function () {
+                let customer_form = $('#update_type').serialize();
+                $.ajax({
+                    url: "type_update",
+                    type: "POST",
+                    data: customer_form,
+                    success: function (data) {
+                        if (data == "Type Record Updated") {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_msg").fadeIn();
+                            $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_type();
+                        } else {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            select_party_type();
+                        }
+                    }
+                });
+            });
+            // update and close customer form
+            //----------------------------------------------------
+            $("#btn_type_update_close").on("click", function () {
+                let customer_form = $('#update_type').serialize();
+                $.ajax({
+                    url: "type_update",
+                    type: "POST",
+                    data: customer_form,
+                    success: function (data) {
+                        if (data == "Type Record Updated") {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+                            $("#edit_msg").fadeIn();
+                            $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_type();
+                            $('#type_update_Modal').modal('hide');
+                        } else {
+                            $("#edit_msg").empty();
+                            $("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+                            // $("#edit_msg").fadeIn();
+                            // $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+                            select_party_type();
+                            // $("#insert_vendor")[0].reset();
+                        }
+                    }
+                });
+            });
+
+            // insert Party Type
+            $("#btn_save_party_type").on("click", function () {
+                var party_type_form = $("#party_type_form").serialize();
+
+                $.ajax({
+                    url: 'insert_party_type',
+                    type: 'post',
+                    data: party_type_form,
+                    success: function (message) {
+                        if (message == 'data inserted') {
+                            $("#msg").html(message);
+                            $("#msg").css('background-color', '#b5e7a0');
+                            $('#party_type_insert').modal('hide');
+                            select_party_type();
+                        } else {
+                            $("#insert-reply").html(message);
+                            $("#insert-reply").css('background-color', '#eca1a6');
+                        }
+                    }
+                });
+            });
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            select_party_type();
+        });
+        // select Party Type 
+        function select_party_type() {
+            $.ajax({
+                url: 'type_select',
+                success: function (data) {
+                    $("#all_party_types").html(data);
+                }
+            });
+        }
+
+
+    </script>
+
+</body>
+
+</html>

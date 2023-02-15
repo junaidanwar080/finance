@@ -1,0 +1,72 @@
+
+	<!-- Party Profile Update Modal Start -->
+	<div class="modal fade" id="update_party_profile_model">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<h4 class="modal-title">Update Customer</h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+				</div>
+				<div id="edit_msg"></div>
+				<!-- Modal body -->
+				<div class="modal-body">
+					<form id="update_party_profile_form" action="update_party_profile" method="POST">
+						<div id="insert-reply" class="text-center" style="border-radius: 5px;"></div>
+						{% csrf_token %}
+						{{party_profile_load.Party_Code}}
+						<div class="form-group" >
+							<label>Party Code<span style="color:red; font-weight:bold;">*</span></label>
+							<input type="text" name="update_party_code" id="update_party_code" value="{{party_profile_load.Party_Code}}" placeholder="Party name" required="" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						<div class="form-group">
+							<label>Name<span style="color:red; font-weight:bold;">*</span></label>
+							<input type="text" name="update_party_name" id="update_party_name" placeholder="Party name" value="{{party_profile_load.Description}}" required="" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						<div class="form-group">
+							<label>Account<span style="color:red; font-weight:bold;">*</span></label>
+							<input list="browsers" name="update_account" id="update_account" class="form-control">
+						</div>
+                        <div class="form-group" hidden>
+							<label>Party Type<span style="color:red; font-weight:bold;">*</span></label>
+                            <div id="update_party_types"></div>
+						</div>
+						<div class="form-group">
+							<label>NTN Number<span style="color:red; font-weight:bold;">*</span></label>
+							<input type="text" name="update_ntn_number" id="update_ntn_number" placeholder=" Number" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						
+						<div class="form-group">
+							<label>Address</label>
+							<input type="text" name="update_address" id="update_address" placeholder="Address name" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						
+						<div class="form-group">
+							<label>Phone Number</label>
+							<input type="text" name="update_phone_no" id="update_phone_no" placeholder="Phone Number"
+								class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+                        <div class="form-group">
+							<label>Description</label>
+							<input type="text" name="update_description" id="update_description" placeholder="Write Description" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+					</form>
+				</div>
+				<!-- Modal footer -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" id="btn_party_update">Update</button>
+					<button type="button" class="btn btn-success" id="btn_party_update_close">Update and
+						close</button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- Party Profile Update Modal END -->

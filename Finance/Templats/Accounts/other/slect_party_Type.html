@@ -1,0 +1,6 @@
+
+<select name="party_type_code" class="form-control"> 
+    {% for i in all_types%}
+    <option value="{{i.Party_Type_Code}}">{{i.Description}}</option>
+    {% endfor %}
+</select>

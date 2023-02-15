@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Parties</title>
+</head>
+
+<body>
+	{% include 'header.html' %}
+	{% include 'Accounts\Party_Profile\PartyProfileModals.html' %}
+	<div class="container">
+		<div style="margin-left: 900px; margin-top: 15px;"><a data-toggle="modal" data-target="#party_profile"
+				class="btn btn-sm btn-primary">New Party</a></div>
+		<div id="msg" class="text-center" style="border-radius: 5px; "></div>
+		<!-- table start -->
+		<div class="card mt-4">
+			<div class="card-header text-center">All Parties</div>
+			<div class="card-body" >
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Sr</th>
+							<th scope="col">Name</th>
+							<th scope="col">Address</th>
+							<th scope="col">NTN No </th>
+							<th scope="col">Phone No </th>
+							<th scope="col">Description </th>
+							<th scope="col">Party Type Code</th>
+							<th scope="col">Account_No</th>
+							<th scope="col">Created On</th>
+							<th scope="col">Actions</th>
+
+						</tr>
+					</thead>
+					<tbody id="all_profiles">
+						
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- table end  -->
+	</div>
+
+	<!-- Party Profile Insert Modal Start -->
+	<div class="modal fade" id="party_profile">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<h4 class="modal-title">Add Party</h4>
+				</div>
+
+				<!-- Modal body -->
+				<div class="modal-body">
+					<form id="party_profile_form" method="POST" action="insert_party_profile">
+						<div id="insert-reply" class="text-center" style="border-radius: 5px;"></div>
+						{% csrf_token %}
+						<div class="form-group">
+							<label>Name<span style="color:red; font-weight:bold;">*</span></label>
+							<input type="text" name="party_name" id="party_name" placeholder="Party name" required="" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						<div class="form-group">
+							<label>Account<span style="color:red; font-weight:bold;">*</span></label>
+							<input list="browsers" name="account" id="account" class="form-control">
+						</div>
+                        <div class="form-group">
+							<label>Party Type<span style="color:red; font-weight:bold;">*</span></label>
+                            <div id="all_types"></div>
+							
+						</div>
+						<div class="form-group">
+							<label>NTN Number<span style="color:red; font-weight:bold;">*</span></label>
+							<input type="text" name="ntn_number" id="ntn_number" placeholder=" Number" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						
+						<div class="form-group">
+							<label>Address</label>
+							<input type="text" name="address" id="address" placeholder="Address name" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+						
+						<div class="form-group">
+							<label>Phone Number</label>
+							<input type="text" name="phone_no" id="phone_no" placeholder="Phone Number"
+								class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+                        <div class="form-group">
+							<label>Description</label>
+							<input type="text" name="description" id="description" placeholder="Write Description" class="form-control">
+							<span class="text-danger error-text "></span>
+						</div>
+					</form>
+				</div>
+
+				<!-- Modal footer -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" id="btn_save_party_profile">Save</button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- Party Profile Insert Modal End -->
+
+
+
+
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			
+			// Party Profile data load in the form
+			//---------------------------------------------
+			$(document).on("click", ".update_profile", function () {
+				let party_id = $(this).attr("id");
+				$.ajax({
+					url: "party_profile_load_for_update/" + party_id,
+					type: "POST",
+					dataType: 'json',
+					success: function (data) {
+						$("#update_party_code").val(data.Party_Code);
+						$("#update_party_name").val(data.Name);
+						$("#update_account").val(data.Account_No);
+						$("#update_ntn_number").val(data.NTN_No);
+						$("#update_address").val(data.Address);
+						$("#update_phone_no").val(data.Phone_No);
+						$("#update_description").val(data.Description);
+					}
+				});
+			});
+			// update Party Profile form
+			//-------------------------------------------
+			$("#btn_party_update").on("click", function () {
+				let update_party_profile_form = $('#update_party_profile_form').serialize();
+				
+				$.ajax({
+					url: "update_party_profile",
+					type: "POST",
+					data: update_party_profile_form,
+					success: function (data) {
+						if (data == "Party Record Updated") {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+							$("#edit_msg").fadeIn();
+							$("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_party_profiles();
+						} else {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+							select_party_profiles();
+						}
+					}
+				});
+			});
+			// update and close Party Profile form
+			//----------------------------------------------------
+			$("#btn_party_update_close").on("click", function () {
+				let update_party_profile_form = $('#update_party_profile_form').serialize();
+				$.ajax({
+					url: "update_party_profile",
+					type: "POST",
+					data: update_party_profile_form,
+					success: function (data) {
+						if (data == "Party Record Updated") {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-success text-center" role="alert">' + data + '</div>');
+							$("#edit_msg").fadeIn();
+							$("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_party_profiles();
+							$('#update_party_profile_model').modal('hide');
+						} else {
+							$("#edit_msg").empty();
+							$("#edit_msg").append('<div class="alert alert-danger text-center" role="alert">' + data + '</div>');
+							// $("#edit_msg").fadeIn();
+							// $("#edit_msg").fadeOut(3000).delay(1000).hide(100);
+							select_party_profiles();
+							// $("#insert_vendor")[0].reset();
+						}
+					}
+				});
+			});
+			// insert vendors
+			//-------------------------------------------------------
+			$("#btn_save_party_profile").on("click", function () {
+				var party_profile_form = $("#party_profile_form").serialize();
+				$.ajax({
+					url: 'insert_party_profile',
+					type: 'post',
+					data: party_profile_form,
+					success: function (message) {
+						if (message == 'data inserted') {
+							$("#msg").html(message);
+							$("#msg").css('background-color', '#b5e7a0');
+							$('#party_profile_form').modal('hide');
+							select_party_profiles();
+						} else {
+							$("#insert-reply").html(message);
+							$("#insert-reply").css('background-color', '#eca1a6');
+						}
+					}
+				});
+			});
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				}
+			});
+
+			load_all_accounts();
+            load_all_paty_types();
+			select_party_profiles();
+		});
+
+		// All Acocunts 
+		const load_all_accounts = () => {
+			$.ajax({
+				url: 'load_all_accounts',
+				type: 'post',
+				success: function (data) {
+					$("#account").html(data);
+				}
+			});
+		}
+
+        const load_all_paty_types = () => {
+            $.ajax({
+                url:'load_all_party_types',
+                success:function(type){
+                    $('#all_types').html(type)
+                }
+            });
+        }
+
+		// select customers 
+		const select_party_profiles = () => {
+			$.ajax({
+				url: 'select_party_profiles',
+				type: 'post',
+				success: function (data) {
+					$("#all_profiles").html(data);
+				}
+			});
+		}
+
+
+	</script>
+
+</body>
+
+</html>
